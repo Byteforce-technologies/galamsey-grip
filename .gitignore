@@ -1,0 +1,4 @@
+venv_311/
+virtualenv/
+__pycache__/
+.env

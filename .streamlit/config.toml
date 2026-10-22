@@ -1,0 +1,11 @@
+[theme]
+base="dark"
+# Standard Esri/ArcGIS technical blue for accents and buttons
+primaryColor="#007AC2" 
+# Deep analytical slate gray (less harsh than pure black)
+backgroundColor="#1E1E1E" 
+# Slightly lighter gray to clearly delineate the sidebar
+secondaryBackgroundColor="#2D2D2D" 
+# Soft off-white for extended readability
+textColor="#E0E0E0" 
+font="sans serif"
