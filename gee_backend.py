@@ -1,37 +1,27 @@
 import ee
 import streamlit as st
-import json
-from google.oauth2.credentials import Credentials
+import os
 
 def initialize_gee():
-    """Initializes Earth Engine using Streamlit Secrets (Cloud) or default config (Local)"""
+    """Initializes Earth Engine by mimicking the local environment on the cloud."""
     try:
-        # Default project ID fallback
-        project_id = "pro-contact-468315-n8"
-        if "EE_PROJECT" in st.secrets:
-            project_id = st.secrets["EE_PROJECT"]
+        project_id = st.secrets.get("EE_PROJECT", "pro-contact-468315-n8")
         
+        # If running on Streamlit Cloud, recreate the local credentials file
         if "EE_CREDENTIALS" in st.secrets:
-            creds_raw = st.secrets["EE_CREDENTIALS"]
-            creds_dict = json.loads(creds_raw) if isinstance(creds_raw, str) else dict(creds_raw)
+            # Create the hidden .config/earthengine directory on the cloud server
+            ee_path = os.path.expanduser("~/.config/earthengine")
+            os.makedirs(ee_path, exist_ok=True)
             
-            creds = Credentials(
-                None,
-                refresh_token=creds_dict.get("refresh_token"),
-                token_uri=creds_dict.get("token_uri", "https://oauth2.googleapis.com/token"),
-                client_id=creds_dict.get("client_id"),
-                client_secret=creds_dict.get("client_secret"),
-                scopes=creds_dict.get("scopes", [
-                    "https://www.googleapis.com/auth/earthengine",
-                    "https://www.googleapis.com/auth/cloud-platform",
-                    "https://www.googleapis.com/auth/devstorage.full_control"
-                ])
-            )
-            ee.Initialize(credentials=creds, project=project_id)
-        else:
-            ee.Initialize(project=project_id)
-            
+            # Write the secret JSON exactly how it looks on your PC
+            cred_file = os.path.join(ee_path, "credentials")
+            with open(cred_file, "w") as f:
+                f.write(st.secrets["EE_CREDENTIALS"])
+        
+        # Initialize Earth Engine normally (it will automatically find the file we just made!)
+        ee.Initialize(project=project_id)
         return True
+        
     except Exception as e:
         st.error(f"Failed to initialize Earth Engine. Check credentials. Error: {e}")
         return False
